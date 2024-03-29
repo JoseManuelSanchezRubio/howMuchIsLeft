@@ -8,39 +8,39 @@ function App() {
   const currentDate = new Date();
   const dayOfTheWeek = currentDate.getDay();
   const [startOfWork, setStartOfWork] = useState('08:00');
-  const [hours, minutes] = startOfWork.split(':');
+  const [startOfWorkHours, startOfWorkMinutes] = startOfWork.split(':');
   const [freeDays, setFreeDays] = useState([]);
+  const isFridayFree = freeDays.includes('5');
 
   const totalHoursOfWork = useMemo(() => {
     let total = 4 * 9 + 7;
-    const isFridayFree = freeDays.includes('5');
 
     if (isFridayFree) {
-      total = total - (freeDays.length - 1) * 9 - 7;
+      total -= (freeDays.length - 1) * 9 - 7;
     } else {
-      total = total - freeDays.length * 9;
+      total -= freeDays.length * 9;
     }
 
     return total;
-  }, [freeDays]);
+  }, [freeDays.length, isFridayFree]);
 
   const endTime = useMemo(() => {
     if (dayOfTheWeek === 5) {
       return {
-        hours: (Number(hours) + 7).toString(),
-        minutes,
+        hours: (Number(startOfWorkHours) + 7).toString(),
+        minutes: startOfWorkMinutes,
       }
     } else {
       return {
-        hours: (Number(hours) + 9).toString(),
-        minutes,
+        hours: (Number(startOfWorkHours) + 9).toString(),
+        minutes: startOfWorkMinutes,
       }
     }
-  }, [dayOfTheWeek, hours, minutes]);
+  }, [dayOfTheWeek, startOfWorkHours, startOfWorkMinutes]);
 
   const startOfWorkDate = new Date();
-  startOfWorkDate.setHours(hours);
-  startOfWorkDate.setMinutes(minutes);
+  startOfWorkDate.setHours(startOfWorkHours);
+  startOfWorkDate.setMinutes(startOfWorkMinutes);
 
   const endOfWorkDate = new Date();
   endOfWorkDate.setHours(endTime.hours);
@@ -50,14 +50,24 @@ function App() {
     const diff = currentDate.getTime() - startOfWorkDate.getTime();
     const hoursDiff = diff / (1000 * 60 * 60);
 
-    return (9 * (dayOfTheWeek - 1)) + hoursDiff;
+
+    let timeToRest = 0
+    if (isFridayFree) {
+      timeToRest += ((freeDays.length - 1) * 9) + 7;
+    } else {
+      timeToRest += freeDays.length * 9;
+    }
+
+    return (9 * (dayOfTheWeek - 1)) + hoursDiff - timeToRest;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayOfTheWeek, endTime.hours, endTime.minutes, totalHoursOfWork]);
+  }, [dayOfTheWeek, freeDays.length, isFridayFree, startOfWorkDate]);
 
 
-
-  // MAIN FUNCTION
   const timeLeft = useMemo(() => {
+    if (dayOfTheWeek === 6 || dayOfTheWeek === 7) {
+      return <span>¿Quieres trabajar el fin de semana o qué? &#128514;</span>
+    }
+
     if (freeDays.length === 5) {
       return <span>Ya te gustaría &#128514;</span>
     }
@@ -66,7 +76,7 @@ function App() {
       return '¿Qué haces aquí? Estás fuera del horario de trabajo.'
     }
 
-    if (!(totalHoursOfWork - hoursWorked)) {
+    if (totalHoursOfWork - hoursWorked <= 0) {
       return <span>¡Buen finde! &#128526;</span>
     }
 
@@ -148,7 +158,7 @@ function App() {
         </div>
       </div>
 
-      <footer className='text-secondary'>Copyright © {new Date().getFullYear()} - Todos los zurdos reservados</footer>
+      <footer className='text-secondary'>Copyright © {new Date().getFullYear()} - JSANCHEZ</footer>
 
     </div>
   )
