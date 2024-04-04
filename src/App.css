@@ -1,11 +1,9 @@
 * {
     font-family: "Varela Round", sans-serif;
-    font-weight: 400;
-    font-style: normal;
 }
 
 .main-content {
-    margin-top: 250px;
+    margin-top: 200px;
 }
 
 .settings {
@@ -30,4 +28,41 @@ footer {
     width: 100%;
     padding-bottom: 10px;
     font-size: smaller;
+}
+
+@keyframes tilt-shaking {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(5deg);
+    }
+
+    50% {
+        transform: rotate(0eg);
+    }
+
+    75% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.question-mark {
+    max-width: 20px;
+    margin-bottom: 25px;
+    margin-left: 6px;
+    transition: 0.25s;
+}
+
+.question-mark:hover {
+    max-width: 25px;
+    margin-left: 2px;
+    margin-bottom: 20px;
+    transition: 0.25s;
+    animation: tilt-shaking 0.5s infinite;
 }

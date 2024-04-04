@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react';
 import './App.css';
-import setting from './assets/setting.png';
+import questionMark from './assets/question-mark.png';
+import { Footer } from './components/Footer';
+import { SettingsButton } from './components/SettingsButon';
+import { SettingsModal } from './components/SettingsModal';
 
+const App = () => {
 
-function App() {
+  const NORMAL_DAILY_HOURS = 9;
+  const FRIDAY_HOURS = 7;
 
-  const currentDate = new Date();
+  const currentDate = useMemo(() => new Date(), [])
   const dayOfTheWeek = currentDate.getDay();
   const [startOfWork, setStartOfWork] = useState('08:00');
   const [startOfWorkHours, startOfWorkMinutes] = startOfWork.split(':');
@@ -13,12 +18,12 @@ function App() {
   const isFridayFree = freeDays.includes('5');
 
   const totalHoursOfWork = useMemo(() => {
-    let total = 4 * 9 + 7;
+    let total = 4 * NORMAL_DAILY_HOURS + FRIDAY_HOURS;
 
     if (isFridayFree) {
-      total -= (freeDays.length - 1) * 9 - 7;
+      total -= (freeDays.length - 1) * NORMAL_DAILY_HOURS - FRIDAY_HOURS;
     } else {
-      total -= freeDays.length * 9;
+      total -= freeDays.length * NORMAL_DAILY_HOURS;
     }
 
     return total;
@@ -27,24 +32,30 @@ function App() {
   const endTime = useMemo(() => {
     if (dayOfTheWeek === 5) {
       return {
-        hours: (Number(startOfWorkHours) + 7).toString(),
+        hours: (Number(startOfWorkHours) + FRIDAY_HOURS).toString(),
         minutes: startOfWorkMinutes,
       }
     } else {
       return {
-        hours: (Number(startOfWorkHours) + 9).toString(),
+        hours: (Number(startOfWorkHours) + NORMAL_DAILY_HOURS).toString(),
         minutes: startOfWorkMinutes,
       }
     }
   }, [dayOfTheWeek, startOfWorkHours, startOfWorkMinutes]);
 
-  const startOfWorkDate = new Date();
-  startOfWorkDate.setHours(startOfWorkHours);
-  startOfWorkDate.setMinutes(startOfWorkMinutes);
+  const startOfWorkDate = useMemo(() => {
+    const startOfWorkDate = new Date();
+    startOfWorkDate.setHours(startOfWorkHours);
+    startOfWorkDate.setMinutes(startOfWorkMinutes);
+    return startOfWorkDate;
+  }, [startOfWorkHours, startOfWorkMinutes]);
 
-  const endOfWorkDate = new Date();
-  endOfWorkDate.setHours(endTime.hours);
-  endOfWorkDate.setMinutes(endTime.minutes);
+  const endOfWorkDate = useMemo(() => {
+    const endOfWorkDate = new Date();
+    endOfWorkDate.setHours(endTime.hours);
+    endOfWorkDate.setMinutes(endTime.minutes);
+    return endOfWorkDate;
+  }, [endTime])
 
   const hoursWorked = useMemo(() => {
     const diff = currentDate.getTime() - startOfWorkDate.getTime();
@@ -53,14 +64,13 @@ function App() {
 
     let timeToRest = 0
     if (isFridayFree) {
-      timeToRest += ((freeDays.length - 1) * 9) + 7;
+      timeToRest += ((freeDays.length - 1) * NORMAL_DAILY_HOURS) + FRIDAY_HOURS;
     } else {
-      timeToRest += freeDays.length * 9;
+      timeToRest += freeDays.length * NORMAL_DAILY_HOURS;
     }
 
-    return (9 * (dayOfTheWeek - 1)) + hoursDiff - timeToRest;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayOfTheWeek, freeDays.length, isFridayFree, startOfWorkDate]);
+    return (NORMAL_DAILY_HOURS * (dayOfTheWeek - 1)) + hoursDiff - timeToRest;
+  }, [currentDate, dayOfTheWeek, freeDays.length, isFridayFree, startOfWorkDate]);
 
 
   const timeLeft = useMemo(() => {
@@ -73,7 +83,13 @@ function App() {
     }
 
     if (currentDate > endOfWorkDate || currentDate < startOfWorkDate || freeDays.includes(dayOfTheWeek.toString())) {
-      return '¿Qué haces aquí? Estás fuera del horario de trabajo.'
+      return (
+        <>
+          <span className='lh-base'>¿Qué haces aquí? Estás fuera del horario de trabajo</span>
+          <span><img src={questionMark} title="El porcentaje solo se muestra en horario laboral" className='question-mark' /></span>
+        </>
+      )
+
     }
 
     if (totalHoursOfWork - hoursWorked <= 0) {
@@ -83,82 +99,17 @@ function App() {
     const timeLeft = (totalHoursOfWork - hoursWorked) / totalHoursOfWork * 100;
 
     return `${timeLeft.toFixed(2)} %`;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayOfTheWeek, freeDays, hoursWorked, totalHoursOfWork]);
-
-
-
-  // HANDLERS
-  const handleChangeStartOfWork = (event) => {
-    setStartOfWork(event.target.value);
-  }
-
-  const handleChangeFreeDays = (event) => {
-    const selectedDay = event.target.value;
-    if (!freeDays.includes(selectedDay)) {
-      setFreeDays([...freeDays, selectedDay])
-    } else {
-      setFreeDays(freeDays.filter(day => day !== selectedDay))
-    }
-  }
+  }, [dayOfTheWeek, freeDays, currentDate, endOfWorkDate, startOfWorkDate, totalHoursOfWork, hoursWorked]);
 
   return (
     <div className='text-center'>
-      <picture type="button" className="d-flex flex-row-reverse" data-bs-toggle="modal" data-bs-target="#formModal">
-        <img src={setting} className='settings' />
-      </picture>
+      <SettingsButton />
 
       <h1 className='container main-content'>{timeLeft}</h1>
 
-      <div className="modal fade" id="formModal" tabIndex="-1" aria-labelledby="formModalLabel" aria-hidden="true" data-bs-theme="dark">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="formModalLabel">Ajustes adicionales</h1>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className='mb-4 form-floating'>
-                  <select name="startOfWork" id='startOfWork' onChange={handleChangeStartOfWork} className='form-select'>
-                    <option value="08:00">08:00</option>
-                    <option value="08:30">08:30</option>
-                    <option value="09:00">09:00</option>
-                    <option value="09:30">09:30</option>
-                  </select>
-                  <label htmlFor="startOfWork">¿A qué hora has empezado a trabajar?</label>
-                </div>
+      <SettingsModal setStartOfWork={setStartOfWork} freeDays={freeDays} setFreeDays={setFreeDays} />
 
-                <div className='mb-2 text-start text-md-center'>Días festivos o libres:</div>
-                <div className='d-flex flex-column align-items-start flex-md-row justify-content-md-around'>
-                  <div className="form-check">
-                    <input type="checkbox" className='form-check-input' id="freeDays1" value='1' onChange={handleChangeFreeDays} />
-                    <label htmlFor="freeDays1" className='form-check-label'>Lunes</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" className='form-check-input' id="freeDays2" value='2' onChange={handleChangeFreeDays} />
-                    <label htmlFor="freeDays2" className='form-check-label'>Martes</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" className='form-check-input' id="freeDays3" value='3' onChange={handleChangeFreeDays} />
-                    <label htmlFor="freeDays3" className='form-check-label'>Miércoles</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" className='form-check-input' id="freeDays4" value='4' onChange={handleChangeFreeDays} />
-                    <label htmlFor="freeDays4" className='form-check-label'>Jueves</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" className='form-check-input' id="freeDays5" value='5' onChange={handleChangeFreeDays} />
-                    <label htmlFor="freeDays5" className='form-check-label'>Viernes</label>
-                  </div>
-                </div>
-
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <footer className='text-secondary'>Copyright © {new Date().getFullYear()} - JSANCHEZ</footer>
+      <Footer />
 
     </div>
   )
