@@ -4,17 +4,17 @@ import questionMark from './assets/question-mark.png';
 import { Footer } from './components/Footer';
 import { SettingsButton } from './components/SettingsButon';
 import { SettingsModal } from './components/SettingsModal';
+import { FRIDAY_HOURS, NORMAL_DAILY_HOURS } from './constants';
+import { useLocalStorageFreeDays } from './hooks/useLocalStorageFreeDays';
 
 const App = () => {
-
-  const NORMAL_DAILY_HOURS = 9;
-  const FRIDAY_HOURS = 7;
 
   const currentDate = useMemo(() => new Date(), [])
   const dayOfTheWeek = currentDate.getDay();
   const [startOfWork, setStartOfWork] = useState('08:00');
   const [startOfWorkHours, startOfWorkMinutes] = startOfWork.split(':');
-  const [freeDays, setFreeDays] = useState([]);
+  const { freeDaysStored } = useLocalStorageFreeDays();
+  const [freeDays, setFreeDays] = useState(freeDaysStored);
   const isFridayFree = freeDays.includes('5');
 
   const totalHoursOfWork = useMemo(() => {
