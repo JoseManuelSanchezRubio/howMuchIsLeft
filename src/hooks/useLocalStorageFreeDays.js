@@ -3,8 +3,8 @@ import { FREE_DAYS_KEY } from "../constants";
 
 export const useLocalStorageFreeDays = () => {
 
-    const freeDaysStored = JSON.parse(localStorage.getItem(FREE_DAYS_KEY)).freeDays || [];
-    const timestamp = JSON.parse(localStorage.getItem(FREE_DAYS_KEY)).timestamp || undefined;
+    const freeDaysStored = JSON.parse(localStorage.getItem(FREE_DAYS_KEY))?.freeDays || [];
+    const timestamp = JSON.parse(localStorage.getItem(FREE_DAYS_KEY))?.timestamp || undefined;
 
     const currentDate = useMemo(() => new Date(), []);
     const timestampDate = useMemo(() => timestamp ? new Date(timestamp) : undefined, [timestamp]);
