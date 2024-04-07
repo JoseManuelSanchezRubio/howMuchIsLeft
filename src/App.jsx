@@ -74,7 +74,7 @@ const App = () => {
 
 
   const timeLeft = useMemo(() => {
-    if (dayOfTheWeek === 6 || dayOfTheWeek === 7) {
+    if (dayOfTheWeek === 6 || dayOfTheWeek === 0) {
       return <span>¿Quieres trabajar el fin de semana o qué? &#128514;</span>
     }
 
