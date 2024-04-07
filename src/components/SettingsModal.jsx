@@ -1,11 +1,15 @@
 /* eslint-disable react/prop-types */
-
+import { useState } from "react";
 import { useLocalStorageFreeDays } from "../hooks/useLocalStorageFreeDays";
+import { useLocalStorageTheme } from "../hooks/useLocalStorageTheme";
 
 export const SettingsModal = (props) => {
     const { setStartOfWork, freeDays, setFreeDays } = props;
 
     const { setLocalStorageFreeDays } = useLocalStorageFreeDays();
+    const { themeStored, setLocalStorageTheme } = useLocalStorageTheme();
+
+    const [theme, setTheme] = useState(themeStored);
 
     const handleChangeStartOfWork = (event) => {
         setStartOfWork(event.target.value);
@@ -20,6 +24,14 @@ export const SettingsModal = (props) => {
             setFreeDays(freeDays.filter(day => day !== selectedDay))
             setLocalStorageFreeDays(freeDays.filter(day => day !== selectedDay))
         }
+    }
+
+    const handleChangeColor = (event) => {
+        event.preventDefault();
+        const color = event.target.value;
+        document.body.style.backgroundColor = color;
+        setLocalStorageTheme(color);
+        setTheme(color);
     }
 
     return (
@@ -42,7 +54,7 @@ export const SettingsModal = (props) => {
                             </div>
 
                             <div className='mb-2 text-start text-md-center'>Días festivos o libres:</div>
-                            <div className='d-flex flex-column align-items-start flex-md-row justify-content-md-around'>
+                            <div className='mb-4 d-flex flex-column align-items-start flex-md-row justify-content-md-around'>
                                 <div className="form-check">
                                     <input type="checkbox" className='form-check-input' id="freeDays1" value='1' onChange={handleChangeFreeDays} checked={freeDays.includes('1')} />
                                     <label htmlFor="freeDays1" className='form-check-label'>Lunes</label>
@@ -63,6 +75,15 @@ export const SettingsModal = (props) => {
                                     <input type="checkbox" className='form-check-input' id="freeDays5" value='5' onChange={handleChangeFreeDays} checked={freeDays.includes('5')} />
                                     <label htmlFor="freeDays5" className='form-check-label'>Viernes</label>
                                 </div>
+                            </div>
+
+                            <div className="mb-2">Color de fondo:</div>
+                            <div className="d-flex justify-content-around">
+                                <button className={`color-button gray ${theme === '#212529' ? 'active' : null}`} value='#212529' onClick={handleChangeColor}></button>
+                                <button className={`color-button blue ${theme === '#131a2c' ? 'active' : null}`} value='#131a2c' onClick={handleChangeColor}></button>
+                                <button className={`color-button green ${theme === '#112b27' ? 'active' : null}`} value='#112b27' onClick={handleChangeColor}></button>
+                                <button className={`color-button purple ${theme === '#31183b' ? 'active' : null}`} value='#31183b' onClick={handleChangeColor}></button>
+                                <button className={`color-button red ${theme === '#422020' ? 'active' : null}`} value='#422020' onClick={handleChangeColor}></button>
                             </div>
 
                         </form>
