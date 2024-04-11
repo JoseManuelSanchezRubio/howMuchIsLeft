@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import './App.css';
 import questionMark from './assets/question-mark.png';
 import { Footer } from './components/Footer';
+import { RemainingTime } from './components/RemainingTime';
 import { SettingsButton } from './components/SettingsButon';
 import { SettingsModal } from './components/SettingsModal';
 import { FRIDAY_HOURS, NORMAL_DAILY_HOURS } from './constants';
@@ -9,7 +10,7 @@ import { useLocalStorageFreeDays } from './hooks/useLocalStorageFreeDays';
 
 const App = () => {
 
-  const currentDate = useMemo(() => new Date(), [])
+  const currentDate = useMemo(() => new Date(), []);
   const dayOfTheWeek = currentDate.getDay();
   const [startOfWork, setStartOfWork] = useState('08:00');
   const [startOfWorkHours, startOfWorkMinutes] = startOfWork.split(':');
@@ -21,7 +22,7 @@ const App = () => {
     let total = 4 * NORMAL_DAILY_HOURS + FRIDAY_HOURS;
 
     if (isFridayFree) {
-      total -= (freeDays.length - 1) * NORMAL_DAILY_HOURS - FRIDAY_HOURS;
+      total -= (freeDays.length - 1) * NORMAL_DAILY_HOURS + FRIDAY_HOURS;
     } else {
       total -= freeDays.length * NORMAL_DAILY_HOURS;
     }
@@ -57,10 +58,10 @@ const App = () => {
     return endOfWorkDate;
   }, [endTime])
 
-  const hoursWorked = useMemo(() => {
-    const diff = currentDate.getTime() - startOfWorkDate.getTime();
-    const hoursDiff = diff / (1000 * 60 * 60);
+  const secondsWorkedToday = currentDate.getTime() - startOfWorkDate.getTime();
+  const hoursWorkedToday = secondsWorkedToday / (1000 * 60 * 60);
 
+  const previousHoursWorked = useMemo(() => {
 
     let timeToRest = 0
     if (isFridayFree) {
@@ -69,43 +70,50 @@ const App = () => {
       timeToRest += freeDays.length * NORMAL_DAILY_HOURS;
     }
 
-    return (NORMAL_DAILY_HOURS * (dayOfTheWeek - 1)) + hoursDiff - timeToRest;
-  }, [currentDate, dayOfTheWeek, freeDays.length, isFridayFree, startOfWorkDate]);
+    const hoursWorked = Math.max(NORMAL_DAILY_HOURS * (dayOfTheWeek - 1), timeToRest);
 
+    return hoursWorked + hoursWorkedToday - timeToRest;
+  }, [dayOfTheWeek, freeDays.length, hoursWorkedToday, isFridayFree]);
 
-  const timeLeft = useMemo(() => {
+  const mainContent = useMemo(() => {
     if (dayOfTheWeek === 6 || dayOfTheWeek === 0) {
-      return <span>¿Quieres trabajar el fin de semana o qué? &#128514;</span>
+      return <span className='fs-1'>¿Quieres trabajar el fin de semana o qué? &#128514;</span>
     }
 
     if (freeDays.length === 5) {
-      return <span>Ya te gustaría &#128514;</span>
+      return <span className='fs-1'>Ya te gustaría &#128514;</span>
     }
 
     if (currentDate > endOfWorkDate || currentDate < startOfWorkDate || freeDays.includes(dayOfTheWeek.toString())) {
       return (
         <>
-          <span className='lh-base'>¿Qué haces aquí? Estás fuera del horario de trabajo</span>
+          <span className='lh-base fs-1'>¿Qué haces aquí? Estás fuera del horario de trabajo</span>
           <span><img src={questionMark} title="El porcentaje solo se muestra en horario laboral" className='question-mark' /></span>
         </>
       )
 
     }
 
-    if (totalHoursOfWork - hoursWorked <= 0) {
-      return <span>¡Buen finde! &#128526;</span>
+    if (totalHoursOfWork - previousHoursWorked <= 0) {
+      return <span className='fs-1'>¡Buen finde! &#128526;</span>
     }
 
-    const timeLeft = (totalHoursOfWork - hoursWorked) / totalHoursOfWork * 100;
+    const timeLeft = (totalHoursOfWork - previousHoursWorked) / totalHoursOfWork * 100;
+    const todaysHoursRemaining = dayOfTheWeek === 5 ? FRIDAY_HOURS - hoursWorkedToday : NORMAL_DAILY_HOURS - hoursWorkedToday;
 
-    return `${timeLeft.toFixed(2)} %`;
-  }, [dayOfTheWeek, freeDays, currentDate, endOfWorkDate, startOfWorkDate, totalHoursOfWork, hoursWorked]);
+    return (
+      <>
+        <div className='percentage'>{timeLeft.toFixed(2)} %</div>
+        <RemainingTime totalHoursOfWork={totalHoursOfWork} todaysHoursRemaining={todaysHoursRemaining} previousHoursWorked={previousHoursWorked} />
+      </>
+    )
+  }, [currentDate, dayOfTheWeek, endOfWorkDate, freeDays, previousHoursWorked, hoursWorkedToday, startOfWorkDate, totalHoursOfWork]);
 
   return (
     <div className='text-center'>
       <SettingsButton />
 
-      <h1 className='container main-content'>{timeLeft}</h1>
+      <main className='container'>{mainContent}</main>
 
       <SettingsModal setStartOfWork={setStartOfWork} freeDays={freeDays} setFreeDays={setFreeDays} />
 

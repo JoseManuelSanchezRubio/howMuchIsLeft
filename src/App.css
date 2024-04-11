@@ -4,8 +4,46 @@ body {
     color: #f8f9fa;
 }
 
-.main-content {
+*::selection {
+    background: #f8f9fa;
+    color: #212529;
+}
+
+*::-moz-selection {
+    background: #f8f9fa;
+    color: #212529;
+}
+
+main {
     margin-top: 200px;
+
+    .percentage {
+        font-size: 50px;
+    }
+}
+
+.arrow {
+    cursor: pointer;
+    padding: 10px;
+    width: 45px;
+    margin-top: -20px;
+
+    &.up {
+        transform: rotate(180deg);
+    }
+}
+
+.remaining-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #a1a7ad;
+
+    .box {
+        border: 1px solid #6c757d;
+        border-radius: 8px;
+        padding: 20px;
+    }
 }
 
 .settings {
@@ -56,7 +94,7 @@ footer {
 
 .question-mark {
     max-width: 20px;
-    margin-bottom: 25px;
+    margin-bottom: 35px;
     margin-left: 6px;
     transition: 0.25s;
 }
@@ -64,7 +102,7 @@ footer {
 .question-mark:hover {
     max-width: 25px;
     margin-left: 2px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     transition: 0.25s;
     animation: tilt-shaking 0.5s infinite;
 }
