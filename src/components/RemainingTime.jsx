@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 import arrow from '../assets/arrow.png';
+import { getDaysUntilPayment } from '../handlers/getDaysUntilPayment';
 import { parseDecimalToTime } from "../handlers/parseDecimalToTime";
 
 export const RemainingTime = (props) => {
@@ -15,6 +16,10 @@ export const RemainingTime = (props) => {
                 <div className='box'>
                     <div className='fs-5'>Tiempo restante</div>
                     <div className='d-flex justify-content-center'>
+                        <div className='px-4 me-2 mt-2'>
+                            <div>Nómina</div>
+                            <div>{getDaysUntilPayment()} días</div>
+                        </div>
                         <div className='px-4 me-2 mt-2'>
                             <div>Semana</div>
                             <div>{parseDecimalToTime(totalHoursOfWork - previousHoursWorked)} h.</div>

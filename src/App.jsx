@@ -7,16 +7,21 @@ import { SettingsButton } from './components/SettingsButon';
 import { SettingsModal } from './components/SettingsModal';
 import { FRIDAY_HOURS, NORMAL_DAILY_HOURS } from './constants';
 import { useLocalStorageFreeDays } from './hooks/useLocalStorageFreeDays';
+import { useLocalStorageStartOfWork } from './hooks/useLocalStorageStartOfWork';
 
 const App = () => {
 
   const currentDate = useMemo(() => new Date(), []);
-  const dayOfTheWeek = currentDate.getDay();
-  const [startOfWork, setStartOfWork] = useState('08:00');
+
+  const { startOfWorkStored } = useLocalStorageStartOfWork();
+  const [startOfWork, setStartOfWork] = useState(startOfWorkStored);
   const [startOfWorkHours, startOfWorkMinutes] = startOfWork.split(':');
+
   const { freeDaysStored } = useLocalStorageFreeDays();
   const [freeDays, setFreeDays] = useState(freeDaysStored);
+
   const isFridayFree = freeDays.includes('5');
+  const dayOfTheWeek = currentDate.getDay();
 
   const totalHoursOfWork = useMemo(() => {
     let total = 4 * NORMAL_DAILY_HOURS + FRIDAY_HOURS;
