@@ -109,6 +109,7 @@ const App = () => {
     return (
       <>
         <div className='percentage'>{timeLeft.toFixed(2)} %</div>
+        <progress className="progress-bar" max="100" value={timeLeft.toFixed(2)} />
         <RemainingTime totalHoursOfWork={totalHoursOfWork} todaysHoursRemaining={todaysHoursRemaining} previousHoursWorked={previousHoursWorked} />
       </>
     )

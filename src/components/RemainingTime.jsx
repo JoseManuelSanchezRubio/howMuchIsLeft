@@ -15,16 +15,16 @@ export const RemainingTime = (props) => {
             {showContent ?
                 <div className='box'>
                     <div className='fs-5'>Tiempo restante</div>
-                    <div className='d-flex justify-content-center'>
-                        <div className='px-4 me-2 mt-2'>
+                    <div className='d-flex justify-content-center gap-4 gap-md-5'>
+                        <div className='me-2 mt-2'>
                             <div>Nómina</div>
                             <div>{getDaysUntilPayment()} días</div>
                         </div>
-                        <div className='px-4 me-2 mt-2'>
+                        <div className='me-2 mt-2'>
                             <div>Semana</div>
                             <div>{parseDecimalToTime(totalHoursOfWork - previousHoursWorked)} h.</div>
                         </div>
-                        <div className='px-4 ms-2 mt-2'>
+                        <div className='mt-2'>
                             <div>Día</div>
                             <div>{parseDecimalToTime(todaysHoursRemaining)} h.</div>
                         </div>
